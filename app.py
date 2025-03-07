@@ -5,16 +5,13 @@ import os
 import traceback
 import json
 
-# Ensure directories exist
-os.makedirs('data', exist_ok=True)
-os.makedirs('static/images', exist_ok=True)
-
+# Initialize Flask app
 app = Flask(__name__)
 
 # Initialize services
 try:
     weather_service = WeatherService()
-    data_processor = WeatherDataProcessor()
+    data_processor = WeatherDataProcessor(use_memory_storage=True)  # Use in-memory storage instead of file system
 except Exception as e:
     print(f"Error initializing services: {str(e)}")
     traceback.print_exc()
@@ -60,7 +57,7 @@ def get_weather_api():
         processed_current = data_processor.process_current_weather(current_weather)
         processed_forecast = data_processor.processed_forecast(forecast)
 
-        # Get historical data
+        # Get historical data - this will be empty in serverless environment
         try:
             historical_data = data_processor.get_historical_data(city)
         except Exception as e:
@@ -97,24 +94,22 @@ def get_weather():
 
 @app.route('/api/debug', methods=['GET'])
 def debug():
-    """Debug endpoint to check if the API key is properly set"""
+    """Debug endpoint to check environment variables and system status"""
     try:
         api_key = os.getenv("OPENWEATHER_API_KEY")
         api_key_status = "Set" if api_key else "Not set"
         
-        # Check if directories exist
-        data_dir_exists = os.path.exists('data')
-        static_dir_exists = os.path.exists('static')
-        images_dir_exists = os.path.exists('static/images')
+        # Check environment
+        env_info = {
+            "api_key_status": api_key_status,
+            "python_version": os.sys.version,
+            "environment": os.environ.get("VERCEL_ENV", "unknown"),
+            "region": os.environ.get("VERCEL_REGION", "unknown")
+        }
         
         return jsonify({
             "status": "ok",
-            "environment": {
-                "api_key_status": api_key_status,
-                "data_directory_exists": data_dir_exists,
-                "static_directory_exists": static_dir_exists,
-                "images_directory_exists": images_dir_exists
-            }
+            "environment": env_info
         })
     except Exception as e:
         return jsonify({
@@ -135,4 +130,8 @@ app.debug = False
 
 if __name__ == '__main__':
     # This is for local development only
+    # Create directories for local development
+    if not os.environ.get("VERCEL_ENV"):
+        os.makedirs('data', exist_ok=True)
+        os.makedirs('static/images', exist_ok=True)
     app.run(debug=True)

@@ -3,9 +3,14 @@ import os
 from datetime import datetime
 
 class WeatherDataProcessor:
-    def __init__(self, data_dir="data"):
+    def __init__(self, data_dir="data", use_memory_storage=False):
         self.data_dir = data_dir
-        os.makedirs(data_dir, exist_ok=True)
+        self.use_memory_storage = use_memory_storage
+        self.memory_storage = {}  # In-memory storage for historical data
+        
+        # Only create directory if not using memory storage and not in Vercel environment
+        if not use_memory_storage and not os.environ.get("VERCEL_ENV"):
+            os.makedirs(data_dir, exist_ok=True)
 
     def process_current_weather(self, weather_data):
         """Process current weather data"""
@@ -61,6 +66,18 @@ class WeatherDataProcessor:
     def _save_weather_data(self, data):
         """Save weather data for historical tracking"""
         city = data["city"].lower()
+        
+        if self.use_memory_storage:
+            # Use in-memory storage for Vercel serverless environment
+            if city not in self.memory_storage:
+                self.memory_storage[city] = {"data": []}
+            self.memory_storage[city]["data"].append(data)
+            # Limit the size of in-memory storage
+            if len(self.memory_storage[city]["data"]) > 10:
+                self.memory_storage[city]["data"] = self.memory_storage[city]["data"][-10:]
+            return
+        
+        # Use file system storage for local development
         filename = f"{self.data_dir}/{city}_history.json"
 
         # Load existing data if available
@@ -83,6 +100,12 @@ class WeatherDataProcessor:
     def get_historical_data(self, city):
         """Get historical weather data for a city"""
         city = city.lower()
+        
+        if self.use_memory_storage:
+            # Return data from in-memory storage
+            return self.memory_storage.get(city, {"data": []})
+        
+        # Use file system storage for local development
         filename = f"{self.data_dir}/{city}_history.json"
 
         if os.path.exists(filename):

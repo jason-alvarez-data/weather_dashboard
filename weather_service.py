@@ -3,7 +3,9 @@ import requests
 from dotenv import load_dotenv
 import traceback
 
-load_dotenv()
+# Only load .env file in local development
+if not os.environ.get("VERCEL_ENV"):
+    load_dotenv()
 
 class WeatherService:
     def __init__(self):
@@ -11,6 +13,7 @@ class WeatherService:
         if not self.api_key:
             raise ValueError("OPENWEATHER_API_KEY environment variable is not set")
         self.base_url = "https://api.openweathermap.org/data/2.5"
+        print(f"WeatherService initialized with API key: {self.api_key[:4]}...")
 
     def get_current_weather(self, city):
         """Get current weather for a city"""
