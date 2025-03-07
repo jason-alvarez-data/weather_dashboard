@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from weather_service import WeatherService
-from data_processor import WeatherDataProcessor
 import os
 import traceback
 import json
@@ -8,13 +6,9 @@ import json
 # Initialize Flask app
 app = Flask(__name__)
 
-# Initialize services
-try:
-    weather_service = WeatherService()
-    data_processor = WeatherDataProcessor(use_memory_storage=True)  # Use in-memory storage instead of file system
-except Exception as e:
-    print(f"Error initializing services: {str(e)}")
-    traceback.print_exc()
+# Initialize services - only if needed for a route
+weather_service = None
+data_processor = None
 
 def log_error(error_message, details=None):
     """Log errors to help with debugging on Vercel"""
@@ -29,11 +23,15 @@ def log_error(error_message, details=None):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        log_error(f"Error in index route: {str(e)}")
+        return jsonify({"error": "Error rendering index page"}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "ok", "message": "Weather Dashboard API is running"})
+    return jsonify({"status": "ok"})
 
 @app.route('/api/weather', methods=['GET'])
 def get_weather_api():
@@ -94,28 +92,18 @@ def get_weather():
 
 @app.route('/api/debug', methods=['GET'])
 def debug():
-    """Debug endpoint to check environment variables and system status"""
-    try:
-        api_key = os.getenv("OPENWEATHER_API_KEY")
-        api_key_status = "Set" if api_key else "Not set"
-        
-        # Check environment
-        env_info = {
-            "api_key_status": api_key_status,
-            "python_version": os.sys.version,
-            "environment": os.environ.get("VERCEL_ENV", "unknown"),
-            "region": os.environ.get("VERCEL_REGION", "unknown")
-        }
-        
-        return jsonify({
-            "status": "ok",
-            "environment": env_info
-        })
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+    """Minimal debug endpoint"""
+    return jsonify({
+        "status": "ok",
+        "message": "Debug endpoint is working"
+    })
+
+@app.route('/api/hello', methods=['GET'])
+def hello():
+    """Basic hello world endpoint"""
+    return jsonify({
+        "message": "Hello, World!"
+    })
 
 @app.errorhandler(404)
 def page_not_found(e):
