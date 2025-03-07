@@ -1,10 +1,9 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 import os
+import json
 
 class WeatherVisualizer:
     def __init__(self, static_dir="static"):

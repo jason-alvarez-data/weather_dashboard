@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from weather_service import WeatherService
 from data_processor import WeatherDataProcessor
 from visualizer import WeatherVisualizer
@@ -18,6 +18,10 @@ visualizer = WeatherVisualizer()
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "ok", "message": "Weather Dashboard API is running"})
 
 @app.route('/weather', methods=['POST'])
 def get_weather():
