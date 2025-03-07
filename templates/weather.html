@@ -160,8 +160,18 @@
         
         // Fetch weather data from the API
         fetch(`/api/weather?city=${encodeURIComponent(city)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                // Check if there's an error in the response
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
                 // Hide loading indicator and show content
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('weather-content').style.display = 'block';
@@ -187,7 +197,8 @@
                 document.getElementById('loading').innerHTML = `
                     <div class="alert alert-danger">
                         <h4>Error loading weather data</h4>
-                        <p>Please try again later or go back to search for a different city.</p>
+                        <p>${error.message || 'Please try again later or go back to search for a different city.'}</p>
+                        <a href="/" class="btn btn-primary mt-3">Return to Home</a>
                     </div>
                 `;
             });
