@@ -2,21 +2,21 @@
   "version": 2,
   "builds": [
     {
-      "src": "minimal_app.py",
+      "src": "index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/minimal_app.py"
+      "dest": "/index.py"
     }
   ],
   "env": {
     "PYTHONUNBUFFERED": "1"
   },
   "functions": {
-    "minimal_app.py": {
+    "index.py": {
       "memory": 1024,
       "maxDuration": 10
     }

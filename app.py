@@ -3,7 +3,7 @@ import os
 import traceback
 import json
 
-# Initialize Flask app
+# Initialize Flask app without any directory creation
 app = Flask(__name__)
 
 # Initialize services - only if needed for a route
