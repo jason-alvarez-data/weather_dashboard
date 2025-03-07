@@ -13,28 +13,45 @@
         .card {
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        .hero-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class=""row justified-content-center">
+        <div class="hero-section">
+            <h1>Weather Dashboard</h1>
+            <p class="lead">Get current weather conditions and forecasts for any city in the world</p>
+        </div>
+        
+        <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class-="card">
+                <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="text-center">Weather Dashboard</h3>
+                        <h3 class="text-center">Search for a City</h3>
                     </div>
                     <div class="card-body">
                         <form action="/weather" method="post">
                             <div class="mb-3">
                                 <label for="city" class="form-label">Enter City Name</label>
-                                <input type="text" class="form-control" id="city" name="city" required>
+                                <input type="text" class="form-control" id="city" name="city" placeholder="e.g., London, New York, Tokyo" required>
                             </div>
-                            <div classs="d-grid">
-                                <button type="submit" class="btn btn-primary:">Get Weather</button>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Get Weather</button>
                             </div>
                         </form>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <p class="text-muted">
+                    Created by Jason Alvarez | Powered by OpenWeatherMap API
+                </p>
             </div>
         </div>
     </div>
