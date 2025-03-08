@@ -2,13 +2,21 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import traceback
 import json
+from weather_service import WeatherService
+from data_processor import DataProcessor
+from visualizer import Visualizer
 
-# Initialize Flask app without any directory creation
+# Create necessary directories if they don't exist
+os.makedirs('data', exist_ok=True)
+os.makedirs('static/images', exist_ok=True)
+
+# Initialize Flask app
 app = Flask(__name__)
 
-# Initialize services - only if needed for a route
-weather_service = None
-data_processor = None
+# Initialize services
+weather_service = WeatherService()
+data_processor = DataProcessor()
+visualizer = Visualizer()
 
 def log_error(error_message, details=None):
     """Log errors to help with debugging on Vercel"""
@@ -113,13 +121,6 @@ def page_not_found(e):
 def server_error(e):
     return render_template('error.html', error="Internal server error. Please try again later."), 500
 
-# This is for Vercel serverless deployment
-app.debug = False
-
 if __name__ == '__main__':
-    # This is for local development only
-    # Create directories for local development
-    if not os.environ.get("VERCEL_ENV"):
-        os.makedirs('data', exist_ok=True)
-        os.makedirs('static/images', exist_ok=True)
+    # This is for local development
     app.run(debug=True)
