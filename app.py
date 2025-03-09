@@ -3,8 +3,8 @@ import os
 import traceback
 import json
 from weather_service import WeatherService
-from data_processor import DataProcessor
-from visualizer import Visualizer
+from data_processor import WeatherDataProcessor
+from visualizer import WeatherVisualizer
 
 # Create necessary directories if they don't exist
 os.makedirs('data', exist_ok=True)
@@ -15,8 +15,8 @@ app = Flask(__name__)
 
 # Initialize services
 weather_service = WeatherService()
-data_processor = DataProcessor()
-visualizer = Visualizer()
+data_processor = WeatherDataProcessor()
+visualizer = WeatherVisualizer()
 
 def log_error(error_message, details=None):
     """Log errors to help with debugging on Vercel"""
@@ -122,5 +122,6 @@ def server_error(e):
     return render_template('error.html', error="Internal server error. Please try again later."), 500
 
 if __name__ == '__main__':
-    # This is for local development
-    app.run(debug=True)
+    # Get port from environment variable (for Heroku compatibility)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
